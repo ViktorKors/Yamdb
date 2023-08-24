@@ -24,6 +24,7 @@ PROJECTS_APPS = [
     "reviews",
     "api",
     "rest_framework",
+    'django_filters',
     "djoser",
 ]
 

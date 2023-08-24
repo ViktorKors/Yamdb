@@ -7,8 +7,8 @@ User = get_user_model()
 
 class Genre(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, null=True)
-
+    slug = models.SlugField( null=True) 
+    
     def __str__(self):
         return self.name
     
@@ -19,7 +19,7 @@ class Genre(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, null=True)
+    slug = models.SlugField(unique=True, null=True)   # 
 
     def __str__(self):
         return self.name

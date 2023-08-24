@@ -1,17 +1,17 @@
 from reviews.models import Titles, Genre, Category, GenreTitles
 from rest_framework import serializers
+from datetime import datetime
 
 
 class GenreSerializer(serializers.ModelSerializer):
     # name = serializers.SlugRelatedField(
     #     slug_field='slug',
     #     queryset=Genre.objects.all(),
-    # )
-    genre_name = serializers.CharField(source='name')
-    genre_slug = serializers.CharField(source='slug')
+    #     required=False,
+    # )    
 
     class Meta:
-        fields = ('id', 'genre_name', 'genre_slug')
+        fields = ('name', 'slug')   #  
         model = Genre
 
 
@@ -20,12 +20,7 @@ class TitlesSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all(),
     )
-    # genre = GenreSerializer(many=True, required=False)
-    genre = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Genre.objects.all(),
-        many=True
-    )
+    genre = GenreSerializer(many=True, required=False)
 
     class Meta:
         fields = '__all__'
@@ -33,22 +28,28 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if 'genre' not in self.initial_data:
-            titles = Titles.objects.create(**validated_data)
-            return titles
+            title = Titles.objects.create(**validated_data)
+            return title
         else:
             genres = validated_data.pop('genre')
-            print(genres)
-            titles = Titles.objects.create(**validated_data)
+            title = Titles.objects.create(**validated_data)
             for genre in genres:
                 current_genre, status = Genre.objects.get_or_create(
-                    name = genre  )  #  **genre
+                     **genre )
                 GenreTitles.objects.create(
-                    genre=current_genre, titles=titles)
-            return titles
+                    genre=current_genre, titles=title)
+            return title
+
+    def validate_year(self, data):
+        if data >= datetime.now().year:
+            raise serializers.ValidationError(
+                f'Год {data} больше текущего!',
+            )
+        return data
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Category
