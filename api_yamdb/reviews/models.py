@@ -51,8 +51,8 @@ class User(AbstractUser):
 
 class Genre(models.Model):
     name = models.CharField(_("Genres name"), max_length=100)
-    slug = models.SlugField(unique=True, null=True)
-
+    slug = models.SlugField( null=True) 
+        
     class Meta:
         verbose_name = _("Genre")
         verbose_name_plural = _("Genres")
@@ -78,14 +78,17 @@ class Titles(models.Model):
     year = models.IntegerField(_("Year"))
     description = models.TextField(_("Description", null=True, blank=True))
     genre = models.ManyToManyField(
-        Genre, verbose_name=_("Genre"), related_name="titles", blank=True
+        Genre,
+        verbose_name=_("Genre"),
+        related_name="titles",
+        blank=True,
+        through="GenreTitles"
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name="titles",
-        verbose_name=_("Category"),
-        null=True
+        verbose_name=_("Category")
     )
 
     def __str__(self):
@@ -94,6 +97,18 @@ class Titles(models.Model):
     class Meta:
         verbose_name = _("Title")
         verbose_name_plural = _("Titles")
+        
+        
+class GenreTitles(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    titles = models.ForeignKey(Titles, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.genre} {self.titles}"
+
+    class Meta:
+        verbose_name = _("Genre and Title")
+        verbose_name_plural = _("Genres and Titles")
 
 
 class Review(models.Model):
