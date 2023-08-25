@@ -1,6 +1,7 @@
 # api_yamdb
 api_yamdb
 
+
 ### Описание:
 Проект YaMDb собирает отзывы пользователей на различные произведения.
 
@@ -82,3 +83,4 @@ GET http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/
 ```
 GET http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/comments/
 ```
+
