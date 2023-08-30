@@ -6,15 +6,22 @@ from rest_framework.exceptions import ValidationError
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
-class GenreSerializer(serializers.ModelSerializer):
+# class GenreSerializer(serializers.ModelSerializer):
 
+#     class Meta:
+#         fields = ('name', 'slug')
+#         model = Genre
+
+
+class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('name', 'slug')
         model = Genre
+        exclude = ("id",)
+        lookup_field = "slug"
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, required=False)
+    genres = GenreSerializer(many=True, required=False)
     category = serializers.SlugRelatedField(
         slug_field="slug", queryset=Category.objects.all()
     )
@@ -26,7 +33,7 @@ class TitleSerializer(serializers.ModelSerializer):
             "name",
             "year",
             "description",
-            "genre",
+            "genres",
             "category",
         )
 
@@ -54,15 +61,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
-        fields = ("id", "author", "title", "text", "pub_date", "rating")
+        fields = ("id", "author", "title", "text", "pub_date", "score")
         model = Review
 
 
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        exclude = ("id",)
-        lookup_field = "slug"
+
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -131,11 +134,12 @@ class TokenSerializer(serializers.Serializer):
 
 
 class ReadOnlyTitleSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(
-        source="reviews__rating__avg", read_only=True
-    )
-    genre = GenreSerializer(many=True)
+    # score = serializers.IntegerField(
+    #     source="reviews__score__avg", read_only=True
+    # )
+    genres = GenreSerializer(many=True)
     category = CategorySerializer()
+    rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -143,8 +147,9 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "year",
-            "rating",
+            # "score",
             "description",
-            "genre",
+            "genres",
             "category",
+            "rating",
         )

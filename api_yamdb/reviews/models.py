@@ -64,7 +64,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     name = models.CharField(_("Name of category"), max_length=100)
-    slug = models.SlugField(_("Category slug"), unique=True, max_length=100)
+    slug = models.SlugField(_("Category slug"), unique=True, max_length=50)
 
     def __str__(self):
         return self.name
@@ -92,8 +92,8 @@ class Title(models.Model):
     name = models.CharField(_("Name"), max_length=100)
     year = models.IntegerField(_("Year"), validators=(validate_year,))
     description = models.TextField(_("Description"), null=True, blank=True)
-    genre = models.ManyToManyField(
-        Genre, verbose_name=_("Genre"), related_name="titles", blank=True
+    genres = models.ManyToManyField(
+        Genre, verbose_name=_("Genres"), related_name="titles", blank=True
     )
     category = models.ForeignKey(
         Category,
@@ -117,7 +117,7 @@ class Review(models.Model):
     pub_date = models.DateTimeField(
         _("Publication date"), auto_now_add=True, db_index=True
     )
-    rating = models.PositiveSmallIntegerField(
+    score = models.PositiveSmallIntegerField(
         _("Feedback score"),
         validators=[
             MinValueValidator(1, MINMAXVALUE),
