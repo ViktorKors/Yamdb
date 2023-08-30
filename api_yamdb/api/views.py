@@ -23,6 +23,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
 # from rest_framework.pagination import LimitOffsetPagination
 # from django.shortcuts import get_object_or_404
 # from rest_framework.permissions import IsAdminUser
+from rest_framework import mixins
 
 
 

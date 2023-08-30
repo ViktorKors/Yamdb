@@ -1,28 +1,22 @@
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
-<<<<<<< HEAD
-from reviews.models import Review, Comment, User, Genre, Titles, Category, GenreTitles
-from datetime import datetime
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field="username",
-        read_only=True
-=======
 from rest_framework.exceptions import ValidationError
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
+
+
 class TitleSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        slug_field="slug", many=True, queryset=Genre.objects.all()
-    )
+    genre = GenreSerializer(many=True, required=False)
     category = serializers.SlugRelatedField(
         slug_field="slug", queryset=Category.objects.all()
->>>>>>> 94d53569c1c5fbd96b8de5f2fa96a35d32ee361b
     )
 
     class Meta:
@@ -92,49 +86,6 @@ class CategorySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-<<<<<<< HEAD
-        fields = "__all__"
-        
-        
-class TitlesSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field="slug",
-        queryset=Category.objects.all(),
-    )
-    genre = GenreSerializer(many=True, required=False)
-
-    class Meta:
-        fields = "__all__"
-        model = Titles
-
-    def create(self, validated_data):
-        if "genre" not in self.initial_data:
-            title = Titles.objects.create(**validated_data)
-            return title
-        else:
-            genres = validated_data.pop("genre")
-            title = Titles.objects.create(**validated_data)
-            for genre in genres:
-                current_genre, status = Genre.objects.get_or_create(
-                     **genre )
-                GenreTitles.objects.create(
-                    genre=current_genre, titles=title)
-            return title
-
-    def validate_year(self, data):
-        if data >= datetime.now().year:
-            raise serializers.ValidationError(
-                f"Год {data} больше текущего!",
-            )
-        return data
-
-
-class CategorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        fields = ("name", "slug")
-        model = Category
-=======
         fields = (
             "username",
             "email",
@@ -145,11 +96,14 @@ class CategorySerializer(serializers.ModelSerializer):
         )
 
 
+
 class ProfileEditSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.CharField(max_length=150, required=True)
     class Meta:
         model = User
         fields = ("username", "email")
@@ -194,4 +148,3 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
             "genre",
             "category",
         )
->>>>>>> 94d53569c1c5fbd96b8de5f2fa96a35d32ee361b

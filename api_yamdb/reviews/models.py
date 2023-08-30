@@ -77,7 +77,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(_("Genres name"), max_length=100)
-    slug = models.SlugField(_("Genres slug"), unique=True, max_length=100)
+    slug = models.SlugField(_("Genres slug"), unique=True, max_length=50)
 
     class Meta:
         ordering = ["name"]
