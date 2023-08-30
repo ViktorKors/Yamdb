@@ -6,13 +6,6 @@ from rest_framework.exceptions import ValidationError
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
-# class GenreSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         fields = ('name', 'slug')
-#         model = Genre
-
-
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
