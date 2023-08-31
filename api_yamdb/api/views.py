@@ -162,3 +162,14 @@ class GenreViewSet(CreateDestroyListGenericViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
+
+    @action(
+        detail=False, methods=['delete'],
+        url_path=r'(?P<slug>\w+)',
+        lookup_field='slug', url_name='category_slug'
+    )
+    def get_genre(self, request, slug):
+        genre = self.get_object()
+        serializer = GenreSerializer(genre)
+        genre.delete()
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
