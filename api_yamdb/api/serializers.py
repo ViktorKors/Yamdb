@@ -10,11 +10,12 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         exclude = ("id",)
-        lookup_field = "slug"
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genres = GenreSerializer(many=True, required=False)
+    genre = serializers.SlugRelatedField(
+        slug_field="slug", many=True, queryset=Genre.objects.all()
+    )
     category = serializers.SlugRelatedField(
         slug_field="slug", queryset=Category.objects.all()
     )
@@ -26,7 +27,7 @@ class TitleSerializer(serializers.ModelSerializer):
             "name",
             "year",
             "description",
-            "genres",
+            "genre",
             "category",
         )
 
@@ -48,7 +49,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         title = get_object_or_404(Title, pk=title_id)
         if request.method == "POST":
             if Review.objects.filter(
-                title=title, author=request.user
+                    title=title, author=request.user
             ).exists():
                 raise ValidationError("Only one review is allowed")
         return data
@@ -56,9 +57,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ("id", "author", "title", "text", "pub_date", "score")
         model = Review
-
-
-
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -92,14 +90,11 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-
 class ProfileEditSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=254, required=True)
-    username = serializers.CharField(max_length=150, required=True)
     class Meta:
         model = User
         fields = ("username", "email")
@@ -115,24 +110,23 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value.lower() == "me":
             raise serializers.ValidationError(
-                f"Использование имени {value} "
-                f"в качестве username запрещено"
+                f"Using name {value}"
+                f"as username is not allowed"
             )
         return value
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=100)
+    username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField(max_length=100)
 
 
 class ReadOnlyTitleSerializer(serializers.ModelSerializer):
-    # score = serializers.IntegerField(
-    #     source="reviews__score__avg", read_only=True
-    # )
-    genres = GenreSerializer(many=True)
+    rating = serializers.IntegerField(
+        source="reviews__score__avg", read_only=True
+    )
+    genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -140,9 +134,8 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "year",
-            # "score",
             "description",
-            "genres",
+            "genre",
             "category",
             "rating",
         )

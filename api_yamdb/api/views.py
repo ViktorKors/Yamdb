@@ -21,10 +21,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           UserSerializer)
 
 from rest_framework.pagination import LimitOffsetPagination
-# from django.shortcuts import get_object_or_404
-# from rest_framework.permissions import IsAdminUser
 from rest_framework import mixins
-
 
 
 class CreateDestroyListGenericViewSet(
@@ -68,18 +65,18 @@ class UserViewSet(viewsets.ModelViewSet):
 )
 @permission_classes([permissions.AllowAny])
 def registration(request):
+    data = {}
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-    data = {}
     data["email"] = user.email
     data["username"] = user.username
     code = default_token_generator.make_token(user)
     send_mail(
-        subject="yamdb registrations",
-        message=f"Пользователь {user.username} успешно"
-                f"зарегистрирован.\n"
-                f"Код подтверждения: {code}",
+        subject="yamdb_registration",
+        message=f"User {user.username} successful"
+                f"registered."
+                f"Confirmation code: {code}",
         from_email=None,
         recipient_list=[user.email],
     )
@@ -109,7 +106,7 @@ def verification(request):
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorOrAdminOrReadOnly, )
+    permission_classes = (AuthorOrAdminOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
@@ -136,10 +133,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = (
-        Title.objects.all().annotate(rating=Avg("reviews__score")).order_by("name")
+        Title.objects.all().annotate(Avg("reviews__score")).order_by("name")
     )
     serializer_class = TitleSerializer
-    pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitlesFilter
@@ -157,7 +153,6 @@ class CategoryViewSet(CreateDestroyListGenericViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
-    lookup_field = "slug"
 
 
 class GenreViewSet(CreateDestroyListGenericViewSet):
@@ -167,4 +162,3 @@ class GenreViewSet(CreateDestroyListGenericViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
-    lookup_field = "slug"

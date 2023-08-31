@@ -18,22 +18,22 @@ class User(AbstractUser):
         (MODERATOR, _("Moderator")),
         (ADMIN, _("Administrator")),
     ]
-    # username_validator = UnicodeUsernameValidator()
+    username_validator = UnicodeUsernameValidator()
     username = models.CharField(
         _("Username"),
         max_length=150,
-        unique=True
-        # help_text=_(
-        #     "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-        # ),
-        # validators=[username_validator],
-        # error_messages={
-        #     "Unique": _("A user with that username already exists."),
-        # },
+        unique=True,
+        help_text=_(
+            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+        ),
+        validators=[username_validator],
+        error_messages={
+            "Unique": _("A user with that username already exists."),
+        },
     )
     first_name = models.CharField(_("First name"), max_length=150, blank=True)
     last_name = models.CharField(_("Last name"), max_length=150, blank=True)
-    email = models.EmailField(_("Email address"), max_length=254, blank=True)
+    email = models.EmailField(_("Email address"), max_length=254, unique=True)
     role = models.CharField(
         _("Users role"),
         choices=ROLES,
@@ -92,7 +92,7 @@ class Title(models.Model):
     name = models.CharField(_("Name"), max_length=100)
     year = models.IntegerField(_("Year"), validators=(validate_year,))
     description = models.TextField(_("Description"), null=True, blank=True)
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre, verbose_name=_("Genres"), related_name="titles", blank=True
     )
     category = models.ForeignKey(
@@ -110,6 +110,17 @@ class Title(models.Model):
         ordering = ["name"]
         verbose_name = _("Title")
         verbose_name_plural = _("Titles")
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE
+    )
 
 
 class Review(models.Model):
