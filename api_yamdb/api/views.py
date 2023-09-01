@@ -35,6 +35,7 @@ class CreateDestroyListGenericViewSet(
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()    
+    http_method_names =  ['get', 'post', 'patch', 'delete']
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
     lookup_field = "username"
