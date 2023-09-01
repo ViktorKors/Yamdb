@@ -154,6 +154,16 @@ class CategoryViewSet(CreateDestroyListGenericViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ("name",)
 
+    @action(
+        detail=False, methods=['delete'],
+        url_path=r'(?P<slug>\w+)',
+        lookup_field='slug'
+    )
+    def get_category(self, request, slug):
+        category = self.get_object()
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class GenreViewSet(CreateDestroyListGenericViewSet):
     queryset = Genre.objects.all()
@@ -166,10 +176,9 @@ class GenreViewSet(CreateDestroyListGenericViewSet):
     @action(
         detail=False, methods=['delete'],
         url_path=r'(?P<slug>\w+)',
-        lookup_field='slug', url_name='category_slug'
+        lookup_field='slug'
     )
     def get_genre(self, request, slug):
         genre = self.get_object()
-        serializer = GenreSerializer(genre)
         genre.delete()
-        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
