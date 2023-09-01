@@ -34,7 +34,7 @@ class CreateDestroyListGenericViewSet(
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all()    
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
     lookup_field = "username"
@@ -46,7 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=["GET", "PATCH"],
         permission_classes=(IsAuthenticated,),
     )
-    def me(self, request):
+    def me(self, request):        
         if request.method == "PATCH":
             serializer = ProfileEditSerializer(
                 request.user, data=request.data, partial=True
@@ -155,9 +155,9 @@ class CategoryViewSet(CreateDestroyListGenericViewSet):
     search_fields = ("name",)
 
     @action(
-        detail=False, methods=['delete'],
-        url_path=r'(?P<slug>\w+)',
-        lookup_field='slug'
+        detail=False, methods=["DELETE"],
+        url_path=r"(?P<slug>\w+)",
+        lookup_field="slug"
     )
     def get_category(self, request, slug):
         category = self.get_object()
@@ -174,9 +174,9 @@ class GenreViewSet(CreateDestroyListGenericViewSet):
     search_fields = ("name",)
 
     @action(
-        detail=False, methods=['delete'],
-        url_path=r'(?P<slug>\w+)',
-        lookup_field='slug'
+        detail=False, methods=["DELETE"],
+        url_path=r"(?P<slug>\w+)",
+        lookup_field="slug"
     )
     def get_genre(self, request, slug):
         genre = self.get_object()
