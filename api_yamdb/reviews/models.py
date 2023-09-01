@@ -6,10 +6,22 @@ from django.utils.translation import gettext_lazy as _
 
 from .validators import validate_year
 
-MINMAXVALUE = _("Enter a value from 1 to 10")
+NAME_MAX_LENGTH = 100
+SLUG_MAX_LENGTH = 50
+EMAIL_MAX_LENGTH = 254
+USERS_NAME_MAX_LENGTH = 150
+ROLE_MAX_LENGTH = 50
+MINVALUE = 1
+MAXVALUE = 10
+MIN_MAX_VALUE = _("Enter a value from 1 to 10")
 
 
 class User(AbstractUser):
+    """
+    Users in the Yamdb authentication system are represented by this
+    model.
+    """
+
     USER = "user"
     ADMIN = "admin"
     MODERATOR = "moderator"
@@ -21,23 +33,36 @@ class User(AbstractUser):
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
         _("Username"),
-        max_length=150,
+        max_length=USERS_NAME_MAX_LENGTH,
         unique=True,
         help_text=_(
-            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+            "Required. 150 characters or fewer. "
+            "Letters, digits and @/./+/-/_ only."
         ),
         validators=[username_validator],
         error_messages={
             "Unique": _("A user with that username already exists."),
         },
     )
-    first_name = models.CharField(_("First name"), max_length=150, blank=True)
-    last_name = models.CharField(_("Last name"), max_length=150, blank=True)
-    email = models.EmailField(_("Email address"), max_length=254, unique=True)
+    first_name = models.CharField(
+        _("First name"),
+        max_length=USERS_NAME_MAX_LENGTH,
+        blank=True,
+    )
+    last_name = models.CharField(
+        _("Last name"),
+        max_length=USERS_NAME_MAX_LENGTH,
+        blank=True,
+    )
+    email = models.EmailField(
+        _("Email address"),
+        max_length=EMAIL_MAX_LENGTH,
+        unique=True,
+    )
     role = models.CharField(
         _("Users role"),
         choices=ROLES,
-        max_length=50,
+        max_length=ROLE_MAX_LENGTH,
         default=USER,
     )
     bio = models.TextField(
@@ -63,8 +88,17 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField(_("Name of category"), max_length=100)
-    slug = models.SlugField(_("Category slug"), unique=True, max_length=50)
+    """Category model."""
+
+    name = models.CharField(
+        _("Name of category"),
+        max_length=NAME_MAX_LENGTH,
+    )
+    slug = models.SlugField(
+        _("Category slug"),
+        unique=True,
+        max_length=SLUG_MAX_LENGTH,
+    )
 
     def __str__(self):
         return self.name
@@ -76,8 +110,17 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(_("Genres name"), max_length=100)
-    slug = models.SlugField(_("Genres slug"), unique=True, max_length=50)
+    """Work genre model."""
+
+    name = models.CharField(
+        _("Genres name"),
+        max_length=NAME_MAX_LENGTH,
+    )
+    slug = models.SlugField(
+        _("Genres slug"),
+        unique=True,
+        max_length=SLUG_MAX_LENGTH,
+    )
 
     class Meta:
         ordering = ["name"]
@@ -89,11 +132,23 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(_("Name"), max_length=100)
+    """Title model."""
+
+    name = models.CharField(
+        _("Name"),
+        max_length=NAME_MAX_LENGTH,
+    )
     year = models.IntegerField(_("Year"), validators=(validate_year,))
-    description = models.TextField(_("Description"), null=True, blank=True)
+    description = models.TextField(
+        _("Description"),
+        null=True,
+        blank=True,
+    )
     genre = models.ManyToManyField(
-        Genre, verbose_name=_("Genres"), related_name="titles", blank=True
+        Genre,
+        verbose_name=_("Genres"),
+        related_name="titles",
+        blank=True,
     )
     category = models.ForeignKey(
         Category,
@@ -113,26 +168,26 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.CASCADE
-    )
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE
-    )
+    """Model that connects genres and titles."""
+
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
 
 class Review(models.Model):
-    text = models.TextField(verbose_name=_("Text"))
+    """Artwork review model."""
+
+    text = models.TextField(
+        _("Text"),
+    )
     pub_date = models.DateTimeField(
         _("Publication date"), auto_now_add=True, db_index=True
     )
     score = models.PositiveSmallIntegerField(
         _("Feedback score"),
         validators=[
-            MinValueValidator(1, MINMAXVALUE),
-            MaxValueValidator(10, MINMAXVALUE),
+            MinValueValidator(MINVALUE, MIN_MAX_VALUE),
+            MaxValueValidator(MAXVALUE, MIN_MAX_VALUE),
         ],
     )
     title = models.ForeignKey(
@@ -160,6 +215,8 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Comment model."""
+
     author = models.ForeignKey(
         User,
         verbose_name=_("Author"),
@@ -167,7 +224,7 @@ class Comment(models.Model):
         related_name="comments",
     )
     text = models.TextField(
-        verbose_name=_("Comments text"),
+        _("Comments text"),
     )
     review = models.ForeignKey(
         Review,
@@ -176,7 +233,9 @@ class Comment(models.Model):
         related_name="comments",
     )
     pub_date = models.DateTimeField(
-        _("Publication date"), auto_now_add=True, db_index=True
+        _("Publication date"),
+        auto_now_add=True,
+        db_index=True,
     )
 
     class Meta:
