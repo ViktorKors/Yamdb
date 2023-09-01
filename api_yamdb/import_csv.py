@@ -37,7 +37,10 @@ list_table = [
     {
         "file": "c:/users.csv",
         "table": "reviews_user",
-        "fields": "id, username, email, role, bio, first_name, last_name, password, is_superuser, is_staff, is_active, date_joined",
+        "fields": "id, username, email, role, bio,\
+                   first_name, last_name, password,\
+                   is_superuser, is_staff, is_active,\
+                   date_joined",
         "fields_num": "?,?,?,?,?,?,?,?,?,?,?,?",
     },
     {
