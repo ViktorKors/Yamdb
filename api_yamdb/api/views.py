@@ -79,7 +79,6 @@ def registration(request):
         )
     data["email"] = user.email
     data["username"] = user.username
-    # code = default_token_generator.make_token(user)
     send_mail(
         subject="yamdb_registration",
         message=f"User {user.username} successful"
