@@ -1,28 +1,33 @@
 from django.contrib.auth.tokens import default_token_generator
-from django.db import IntegrityError
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Genre, Review, Title, User
 
 from .filters import TitlesFilter
-from .permissions import AdminOrModeratorOrReadOnly, IsAdmin, IsAdminOrReadOnly, AuthorOrAdminOrReadOnly
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ProfileEditSerializer,
-                          ReadOnlyTitleSerializer, RegistrationSerializer,
-                          ReviewSerializer, TitleSerializer, TokenSerializer,
-                          UserSerializer)
-
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework import mixins
+from .permissions import AuthorOrAdminOrReadOnly, IsAdmin, IsAdminOrReadOnly
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ProfileEditSerializer,
+    ReadOnlyTitleSerializer,
+    RegistrationSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    TokenSerializer,
+    UserSerializer,
+)
 
 
 class CreateDestroyListGenericViewSet(
@@ -35,8 +40,10 @@ class CreateDestroyListGenericViewSet(
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()    
-    http_method_names =  ["get", "post", "patch", "delete"]
+    """Users CRUD."""
+
+    queryset = User.objects.all()
+    http_method_names = ["get", "post", "patch", "delete"]
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
     lookup_field = "username"
@@ -48,7 +55,8 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=["GET", "PATCH"],
         permission_classes=(IsAuthenticated,),
     )
-    def me(self, request):        
+    def me(self, request):
+        """Profile editing function."""
         if request.method == "PATCH":
             serializer = ProfileEditSerializer(
                 request.user, data=request.data, partial=True
@@ -67,6 +75,7 @@ class UserViewSet(viewsets.ModelViewSet):
 )
 @permission_classes([permissions.AllowAny])
 def registration(request):
+    """Function for registering users."""
     data = {}
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -74,16 +83,16 @@ def registration(request):
         user = serializer.save()
     except IntegrityError:
         return Response(
-            "Такой логин или email уже существуют",
-            status=status.HTTP_400_BAD_REQUEST
+            "This username or email already exists",
+            status=status.HTTP_400_BAD_REQUEST,
         )
     data["email"] = user.email
     data["username"] = user.username
     send_mail(
         subject="yamdb_registration",
         message=f"User {user.username} successful"
-                f"registered."
-                f"Confirmation code: {user.confirmation_code}",
+        f"registered."
+        f"Confirmation code: {user.confirmation_code}",
         from_email=None,
         recipient_list=[user.email],
     )
@@ -97,6 +106,7 @@ def registration(request):
 )
 @permission_classes([permissions.AllowAny])
 def verification(request):
+    """Function to submit and test the confirmation code."""
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     data = {}
@@ -112,6 +122,8 @@ def verification(request):
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
+    """Reviews CRUD."""
+
     serializer_class = ReviewSerializer
     permission_classes = (AuthorOrAdminOrReadOnly,)
 
@@ -126,6 +138,8 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Comments CRUD."""
+
     serializer_class = CommentSerializer
     permission_classes = (AuthorOrAdminOrReadOnly,)
 
@@ -139,6 +153,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
+    """Titles CRUD."""
+
     queryset = (
         Title.objects.all().annotate(Avg("reviews__score")).order_by("name")
     )
@@ -154,6 +170,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(CreateDestroyListGenericViewSet):
+    """Category CRUD."""
+
     queryset = Category.objects.all()
     pagination_class = LimitOffsetPagination
     serializer_class = CategorySerializer
@@ -162,17 +180,20 @@ class CategoryViewSet(CreateDestroyListGenericViewSet):
     search_fields = ("name",)
 
     @action(
-        detail=False, methods=["DELETE"],
+        detail=False,
+        methods=["DELETE"],
         url_path=r"(?P<slug>\w+)",
-        lookup_field="slug"
+        lookup_field="slug",
     )
     def get_category(self, request, slug):
-        category = self.get_object()
-        category.delete()
+        """Function to remove category."""
+        self.get_object().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GenreViewSet(CreateDestroyListGenericViewSet):
+    """Genre CRUD."""
+
     queryset = Genre.objects.all()
     pagination_class = LimitOffsetPagination
     serializer_class = GenreSerializer
@@ -181,11 +202,12 @@ class GenreViewSet(CreateDestroyListGenericViewSet):
     search_fields = ("name",)
 
     @action(
-        detail=False, methods=["DELETE"],
+        detail=False,
+        methods=["DELETE"],
         url_path=r"(?P<slug>\w+)",
-        lookup_field="slug"
+        lookup_field="slug",
     )
     def get_genre(self, request, slug):
-        genre = self.get_object()
-        genre.delete()
+        """Function to remove genre."""
+        self.get_object().delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
