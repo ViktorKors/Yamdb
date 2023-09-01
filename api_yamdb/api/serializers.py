@@ -1,4 +1,6 @@
+from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
+
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -95,15 +97,26 @@ class ProfileEditSerializer(UserSerializer):
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.CharField(max_length=150, required=True)
     class Meta:
         model = User
         fields = ("username", "email")
 
     def save(self):
-        user = User(
+        # user = User(
+        #     username=self.validated_data["username"],
+        #     email=self.validated_data["email"],
+        # )
+        # user.save()
+
+        user, self.create = User.objects.get_or_create(
             username=self.validated_data["username"],
-            email=self.validated_data["email"],
+            email=self.validated_data["email"]
         )
+
+        confirmation_code = default_token_generator.make_token(user)
+        user.confirmation_code = confirmation_code
         user.save()
         return user
 

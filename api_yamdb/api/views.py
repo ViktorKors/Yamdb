@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.db import IntegrityError
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -35,7 +36,7 @@ class CreateDestroyListGenericViewSet(
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()    
-    http_method_names =  ['get', 'post', 'patch', 'delete']
+    http_method_names =  ["get", "post", "patch", "delete"]
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
     lookup_field = "username"
@@ -69,15 +70,21 @@ def registration(request):
     data = {}
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = serializer.save()
+    try:
+        user = serializer.save()
+    except IntegrityError:
+        return Response(
+            "Такой логин или email уже существуют",
+            status=status.HTTP_400_BAD_REQUEST
+        )
     data["email"] = user.email
     data["username"] = user.username
-    code = default_token_generator.make_token(user)
+    # code = default_token_generator.make_token(user)
     send_mail(
         subject="yamdb_registration",
         message=f"User {user.username} successful"
                 f"registered."
-                f"Confirmation code: {code}",
+                f"Confirmation code: {user.confirmation_code}",
         from_email=None,
         recipient_list=[user.email],
     )
