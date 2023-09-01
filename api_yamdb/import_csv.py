@@ -24,7 +24,7 @@ list_table = [
     },
     {
         'file': 'c:/genre_title.csv',
-        'table': 'reviews_title_genres',
+        'table': 'reviews_title_genre',
         'fields': 'id, title_id, genre_id',
         'fields_num': '?,?,?'
     },
@@ -43,7 +43,7 @@ list_table = [
     {
         'file': 'c:/review.csv',
         'table': 'reviews_review',
-        'fields': 'id, title_id, text, author_id, rating, pub_date',
+        'fields': 'id, title_id, text, author_id, score, pub_date',
         'fields_num': '?,?,?,?,?,?'
     },
 ]
