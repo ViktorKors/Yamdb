@@ -1,90 +1,9 @@
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
+from .constants import (NAME_MAX_LENGTH, SLUG_MAX_LENGTH, MINVALUE, MAXVALUE, MIN_MAX_VALUE)
+from users.models import User
 from .validators import validate_year
-
-NAME_MAX_LENGTH = 100
-SLUG_MAX_LENGTH = 50
-EMAIL_MAX_LENGTH = 254
-USERS_NAME_MAX_LENGTH = 150
-ROLE_MAX_LENGTH = 50
-MINVALUE = 1
-MAXVALUE = 10
-MIN_MAX_VALUE = _("Enter a value from 1 to 10")
-
-
-class User(AbstractUser):
-    """
-    Users in the Yamdb authentication system are represented by this
-    model.
-    """
-
-    USER = "user"
-    ADMIN = "admin"
-    MODERATOR = "moderator"
-    ROLES = [
-        (USER, _("Authenticated user")),
-        (MODERATOR, _("Moderator")),
-        (ADMIN, _("Administrator")),
-    ]
-    username_validator = UnicodeUsernameValidator()
-    username = models.CharField(
-        _("Username"),
-        max_length=USERS_NAME_MAX_LENGTH,
-        unique=True,
-        help_text=_(
-            "Required. 150 characters or fewer. "
-            "Letters, digits and @/./+/-/_ only."
-        ),
-        validators=[username_validator],
-        error_messages={
-            "Unique": _("A user with that username already exists."),
-        },
-    )
-    first_name = models.CharField(
-        _("First name"),
-        max_length=USERS_NAME_MAX_LENGTH,
-        blank=True,
-    )
-    last_name = models.CharField(
-        _("Last name"),
-        max_length=USERS_NAME_MAX_LENGTH,
-        blank=True,
-    )
-    email = models.EmailField(
-        _("Email address"),
-        max_length=EMAIL_MAX_LENGTH,
-        unique=True,
-    )
-    role = models.CharField(
-        _("Users role"),
-        choices=ROLES,
-        max_length=ROLE_MAX_LENGTH,
-        default=USER,
-    )
-    bio = models.TextField(
-        _("Biography"),
-        blank=True,
-    )
-
-    class Meta:
-        ordering = ["id"]
-        verbose_name = _("User")
-        verbose_name_plural = _("Users")
-
-    def __str__(self):
-        return self.username
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN
-
-    @property
-    def is_moderator(self):
-        return self.role == self.MODERATOR
 
 
 class Category(models.Model):

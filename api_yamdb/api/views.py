@@ -12,7 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Genre, Review, Title, User
+from reviews.models import Category, Genre, Review, Title
+from users.models import User
 
 from .filters import TitlesFilter
 from .permissions import AuthorOrAdminOrReadOnly, IsAdmin, IsAdminOrReadOnly

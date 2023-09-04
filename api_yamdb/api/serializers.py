@@ -6,7 +6,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -143,7 +144,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         """Function that checks the username range boundaries."""
         if value.lower() == "me":
             raise serializers.ValidationError(
-                f"Using name {value}" f"as username is not allowed"
+                f"Using name {value} as username is not allowed"
             )
         return value
 

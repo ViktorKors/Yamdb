@@ -26,6 +26,7 @@ SYSTEM_APPS = [
 PROJECTS_APPS = [
     "reviews",
     "api",
+    "users",
     "rest_framework",
     "django_filters",
 ]
@@ -105,7 +106,7 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-AUTH_USER_MODEL = "reviews.User"
+AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "en-us"
 
