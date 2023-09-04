@@ -3,7 +3,12 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
 from users.constants import (
-    EMAIL_MAX_LENGTH, USERS_NAME_MAX_LENGTH, ROLE_MAX_LENGTH, USER, ADMIN, MODERATOR
+    EMAIL_MAX_LENGTH,
+    USERS_NAME_MAX_LENGTH,
+    ROLE_MAX_LENGTH,
+    USER,
+    ADMIN,
+    MODERATOR
 )
 
 
@@ -17,7 +22,6 @@ class User(AbstractUser):
         USER = 'user'
         MODERATOR = 'moderator'
         ADMIN = 'admin'
-
 
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
